@@ -36,11 +36,6 @@
             android:screenOrientation="sensorLandscape" />
 
 
-        <service
-            android:name=".common.services.BackgroundPlayService"
-            android:enabled="true"
-            android:exported="true"
-            android:stopWithTask="false" />
     </application>
 
 </manifest>
