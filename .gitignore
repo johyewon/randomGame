@@ -11,5 +11,6 @@
 .DS_Store
 /build
 /captures
+.aab
 .externalNativeBuild
 .cxx
