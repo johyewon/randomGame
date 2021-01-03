@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">randomGame</string>
-
+    <string name="app_name">랜덤게임</string>
 
     <string name="msg_info">안내</string>
     <string name="msg_desc">알림</string>
@@ -34,4 +33,13 @@
     <string name="new_update">새로운 업데이트가 있습니다.</string>
 
     <string name="install">설치</string>
+
+    <string name="author"><![CDATA[@hanix&BD]]></string>
+
+    <string name="main_character">인물퀴즈</string>
+    <string name="main_idiom">사자성어</string>
+    <string name="main_saying">속담</string>
+    <string name="main_relay">이어말하기</string>
+    <string name="main_body">몸으로 말해요</string>
+    <string name="main_object">사물퀴즈</string>
 </resources>

@@ -2,7 +2,6 @@ package com.hanix.randomgame.view;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -34,7 +33,7 @@ public class AppIntro extends AppCompatActivity {
 
             Intent intent;
 
-            if (msg.what == STOP_SPLASH) {// 2020-05-20 튜토리얼 매번 나오게 수정
+            if (msg.what == STOP_SPLASH) {
                 intent = new Intent(AppIntro.this, MainActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in_activity, R.anim.hold_activity);

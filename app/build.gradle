@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.1"
+    buildToolsVersion "30.0.2"
     buildFeatures{
         dataBinding = true
     }
@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.1"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,7 +48,7 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all {
             def formattedDate = new Date().format('yyyyMMdd-HHmmss')
-            outputFileName = "adre" + "_v${variant.versionName}_${variant.buildType.name}_${formattedDate}.apk"
+            outputFileName = "random" + "_v${variant.versionName}_${variant.buildType.name}_${formattedDate}.apk"
         }
     }
 }
@@ -56,7 +56,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -67,7 +67,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.stanfy:gson-xml-java:0.1.7'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72'
-    implementation 'com.google.android.play:core:1.8.2'
+    implementation 'com.google.android.play:core:1.9.0'
     implementation 'com.mediatek.mcs:mcs-android:0.1.0'
     implementation 'com.loopj.android:android-async-http:1.4.11'
     implementation 'commons-codec:commons-codec:20041127.091804'

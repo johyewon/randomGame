@@ -65,7 +65,7 @@ public class VersionCheckTask {
                 if (appUpdateManager != null)
                     appUpdateManager.unregisterListener(listener);
             } else {
-                GLog.i("installStateUpdateListener  : state : " + state.installStatus());
+                GLog.d("installStateUpdateListener  : state : " + state.installStatus());
             }
         }
     };
