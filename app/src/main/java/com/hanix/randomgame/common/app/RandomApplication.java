@@ -12,7 +12,11 @@ import java.io.File;
 public class RandomApplication extends MultiDexApplication {
 
     private static RandomApplication instance;
-    public static RandomApplication getInstance() { return instance; }
+
+    public static RandomApplication getInstance() {
+        return instance;
+    }
+
     //로그 표시를 위한 디버그 모드인지를 판별한다.
     public boolean isDebuggable = false;
     //앱 Crash 에러 로그가 저장된 경로(cache 디렉토리)
@@ -36,8 +40,13 @@ public class RandomApplication extends MultiDexApplication {
         logForPkgName = this.getPackageName();
     }
 
+    /**
+     * 어플 종료하기
+     *
+     * @param activity
+     */
     public void finishApp(Activity activity) {
-        if(activity.isTaskRoot()) {
+        if (activity.isTaskRoot()) {
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(0);
         } else {
