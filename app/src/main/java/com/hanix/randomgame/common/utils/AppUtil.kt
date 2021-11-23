@@ -1,48 +1,41 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.text.TextUtils;
+import android.app.Activity
+import android.app.ActivityManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.text.TextUtils
+import com.hanix.randomgame.common.app.GLog.e
+import com.hanix.randomgame.common.constants.URLApi
+import org.jsoup.Jsoup
+import java.io.IOException
 
-import com.hanix.randomgame.common.app.GLog;
-import com.hanix.randomgame.common.constants.URLApi;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
-import java.util.List;
-
-public class AppUtil {
-
+object AppUtil {
     /**
      * 앱이 실행 중인지 확인
-     **/
-    public static boolean isAppRunning(Context context) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
-        for (int i = 0; i < procInfos.size(); i++) {
-            if (procInfos.get(i).processName.equals(context.getPackageName())) {
-                return true;
+     */
+    fun isAppRunning(context: Context): Boolean {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val procInfos = activityManager.runningAppProcesses
+        for (i in procInfos.indices) {
+            if (procInfos[i].processName == context.packageName) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
     /**
      * 확인하고 싶은 서비스가 실행중인지 확인
-     **/
-    public static boolean isServiceRunning(Context context, Class<?> serviceClass) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
+     */
+    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
     /**
@@ -51,14 +44,13 @@ public class AppUtil {
      * @param context
      * @return
      */
-    public static String getAppVersion(Activity context) {
+    fun getAppVersion(context: Activity): String? {
         try {
-            return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            GLog.e(e.getMessage(), e);
+            return context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            e(e.message, e)
         }
-
-        return null;
+        return null
     }
 
     /**
@@ -67,29 +59,31 @@ public class AppUtil {
      *
      * @return
      */
-    public static String getMarketVersion() {
-        try {
-            Document doc = Jsoup.connect(URLApi.getStoreURL()).get();
-            Elements currentVersionDiv = doc.select(".BgcNfc");
-            Elements currentVersion = doc.select("div.hAyfc div span.htlgb");
-            for(int i = 0; i < currentVersionDiv.size(); i++) {
-                if(currentVersionDiv.get(i).text().equals("Current Version"))
-                    return currentVersion.get(i).text();
+    private val marketVersion: String?
+        get() {
+            try {
+                val doc = Jsoup.connect(URLApi.getStoreURL()).get()
+                val currentVersionDiv = doc.select(".BgcNfc")
+                val currentVersion = doc.select("div.hAyfc div span.htlgb")
+                for (i in currentVersionDiv.indices) {
+                    if (currentVersionDiv[i].text() == "Current Version") return currentVersion[i].text()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                e(e.message!!)
+                e("문서 오류")
+                e.printStackTrace()
+            } catch (runTimeEx: RuntimeException) {
+                e(runTimeEx.message!!)
+                e("버전가져오기 에러")
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            GLog.e(e.getMessage());
-            GLog.e("문서 오류");
-            e.printStackTrace();
-        } catch (RuntimeException runTimeEx) {
-            GLog.e(runTimeEx.getMessage());
-            GLog.e("버전가져오기 에러");
+            return null
         }
-        return null;
-    }
 
     //  현재 설치 버전과 플레이스토어 버전이 같은지 확인
-    public static boolean isVersionEquals(Activity context) {
-        return getMarketVersion() != null && !getMarketVersion().equals("기기에 따라 다릅니다.") && TextUtils.equals(getAppVersion(context), getMarketVersion());
+    fun isVersionEquals(context: Activity): Boolean {
+        return marketVersion != null && marketVersion != "기기에 따라 다릅니다." && TextUtils.equals(
+            getAppVersion(context), marketVersion
+        )
     }
 }

@@ -164,7 +164,6 @@ public class DlgUtil {
      * 모든 다이얼로그 다 내리기
      */
     public static void destroyAllWindow() {
-        GLog.e("destroyAllWindow()");
         mWaitingDlgIsShowing = false;
         if (mWaitingDialog != null) try {
             mWaitingDialog.dismiss();

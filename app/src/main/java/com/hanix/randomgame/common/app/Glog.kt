@@ -1,102 +1,90 @@
-package com.hanix.randomgame.common.app;
+package com.hanix.randomgame.common.app
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.util.Log;
-
-import com.hanix.randomgame.common.constants.AppConstants;
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.util.Log
+import com.hanix.randomgame.common.constants.AppConstants
 
 /**
  * 로그 통합 관리
  */
-public class GLog {
-
+object GLog {
     /**
      * 현재 디버그 모드여부를 리턴
      * @param context
      * @return
      */
-    public static boolean isDebuggable (Context context) {
-
-        PackageManager pm = context.getPackageManager();
+    @JvmStatic
+    fun isDebuggable(context: Context): Boolean {
+        val pm = context.packageManager
         try {
-            ApplicationInfo appInfo = pm.getApplicationInfo(context.getPackageName(), 0);
-            return (0 != (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE));
-        } catch (PackageManager.NameNotFoundException e) {
+            val appInfo = pm.getApplicationInfo(context.packageName, 0)
+            return 0 != appInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+        } catch (e: PackageManager.NameNotFoundException) {
             /* debuggable variable will remain false */
         }
-
-        return false;
+        return false
     }
 
-    private static synchronized void dLong (String theMsg, int logType) {
-        final int MAX_INDEX = 2000;
-
-        if(theMsg == null) return;
-
-        if(theMsg.length() > MAX_INDEX) {
-            String theSubString = theMsg.substring(0, MAX_INDEX);
-
-            theSubString = getWithMethodName(theSubString);
-
-            switch(logType) {
-                case 1: //i
-                    Log.i(AppConstants.TAG, theSubString);
-                    break;
-                case 2: //d
-                    Log.d(AppConstants.TAG, theSubString);
-                    break;
-                case 3: //e
-                    Log.e(AppConstants.TAG, theSubString);
-                    break;
+    @Synchronized
+    private fun dLong(theMsg: String, logType: Int) {
+        var theMsg: String? = theMsg
+        val MAX_INDEX = 2000
+        if (theMsg == null) return
+        if (theMsg.length > MAX_INDEX) {
+            var theSubString = theMsg.substring(0, MAX_INDEX)
+            theSubString = getWithMethodName(theSubString)
+            when (logType) {
+                1 -> Log.i(AppConstants.TAG, theSubString)
+                2 -> Log.d(AppConstants.TAG, theSubString)
+                3 -> Log.e(AppConstants.TAG, theSubString)
             }
-            dLong(theMsg.substring(MAX_INDEX), MAX_INDEX);
+            dLong(theMsg.substring(MAX_INDEX), MAX_INDEX)
         } else {
-            theMsg = getWithMethodName(theMsg);
-
-            switch (logType) {
-                case 1: //i
-                    Log.i(AppConstants.TAG, theMsg);
-                    break;
-                case 2: //d
-                    Log.d(AppConstants.TAG, theMsg);
-                    break;
-                case 3: //e
-                    Log.e(AppConstants.TAG, theMsg);
-                    break;
+            theMsg = getWithMethodName(theMsg)
+            when (logType) {
+                1 -> Log.i(AppConstants.TAG, theMsg)
+                2 -> Log.d(AppConstants.TAG, theMsg)
+                3 -> Log.e(AppConstants.TAG, theMsg)
             }
         }
     }
 
-    private static String getWithMethodName (String log) {
-        try {
-            StackTraceElement ste = Thread.currentThread().getStackTrace()[5];
-            return "[" +
-                    ste.getFileName().replace(".java", "").replace(".kt", "") +
+    private fun getWithMethodName(log: String): String {
+        return try {
+            val ste = Thread.currentThread().stackTrace[5]
+            "[" +
+                    ste.fileName.replace(".java", "").replace(".kt", "") +
                     "::" +
-                    ste.getMethodName() +
+                    ste.methodName +
                     "] " +
-                    log;
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return log;
+                    log
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            log
         }
     }
 
-    public static synchronized void i (String msg) {
-        if(RandomApplication.getInstance().isDebuggable) dLong(msg, 1);
+    @JvmStatic
+    @Synchronized
+    fun i(msg: String) {
+        if (RandomApplication.getInstance().isDebuggable) dLong(msg, 1)
     }
 
-    public static synchronized void d (String msg) {
-        if(RandomApplication.getInstance().isDebuggable) dLong(msg, 2);
+    @JvmStatic
+    @Synchronized
+    fun d(msg: String) {
+        if (RandomApplication.getInstance().isDebuggable) dLong(msg, 2)
     }
 
-    public static synchronized void e (String msg) {
-        if(RandomApplication.getInstance().isDebuggable) dLong(msg, 3);
+    @Synchronized
+    fun e(msg: String) {
+        if (RandomApplication.getInstance().isDebuggable) dLong(msg, 3)
     }
 
-    public static void e (String msg, Exception e) {
-        if(RandomApplication.getInstance().isDebuggable) Log.e(AppConstants.TAG, msg, e);
+    @JvmStatic
+    fun e(msg: String?, e: Exception?) {
+        if (RandomApplication.getInstance().isDebuggable) Log.e(AppConstants.TAG, msg, e)
     }
 }
