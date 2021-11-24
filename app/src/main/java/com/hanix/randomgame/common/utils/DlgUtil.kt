@@ -1,66 +1,64 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.Window;
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.os.Handler
+import android.os.Looper
+import android.view.Window
+import com.hanix.randomgame.R
+import com.hanix.randomgame.common.app.GLog.d
 
-import com.hanix.randomgame.R;
-import com.hanix.randomgame.common.app.GLog;
+object DlgUtil {
 
-import java.util.Objects;
+    private var mWaitingDlgIsShowing = false
+    private var mWaitingDialog: AlertDialog? = null
+    private var mMsgDialog: AlertDialog? = null
+    private var mConfirmDialog: AlertDialog? = null
 
-
-public class DlgUtil {
-
-    private static boolean mWaitingDlgIsShowing = false;
-
-    private static AlertDialog mWaitingDialog;
-    private static AlertDialog mMsgDialog;
-    private static AlertDialog mConfirmDialog;
-
-    public static void showWaitingDlg(final Context context) {
+    fun showWaitingDlg(context: Context?) {
 
         //현재 waiting 보여지고 있는 상태면, 다시 show 요청이 들어와도 show 하지 않는다.
         //(waiting 다이얼로그만의 특성)
-        if (mWaitingDlgIsShowing) return;
+        if (mWaitingDlgIsShowing) return
 
-        mWaitingDlgIsShowing = true;
+        mWaitingDlgIsShowing = true
 
-        new Handler(Looper.getMainLooper()).post(() -> {
+        Handler(Looper.getMainLooper()).post {
             try {
-                GLog.d("showWaitingDlg() ... ...");
+                d("showWaitingDlg() ... ...")
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setView(R.layout.view_dlg_loading);
-                mWaitingDialog = builder.create();
-                mWaitingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                mWaitingDialog.setCancelable(false);
-                Objects.requireNonNull(mWaitingDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                val builder = AlertDialog.Builder(context)
+                builder.setView(R.layout.view_dlg_loading)
+                mWaitingDialog = builder.create()
 
-                mWaitingDialog.show();
-            } catch (Exception e) {
-                e.printStackTrace();
+                mWaitingDialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                mWaitingDialog?.setCancelable(false)
+                mWaitingDialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                mWaitingDialog?.show()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        });
+        }
 
         //10초 후에는 무조건 없앤다.
-        new Handler(Looper.getMainLooper()).postDelayed(DlgUtil::hideWaitingDlg, 10000);
+        Handler(Looper.getMainLooper()).postDelayed({ hideWaitingDlg() }, 10000)
     }
 
-    public static void hideWaitingDlg() {
+    private fun hideWaitingDlg() {
         if (mWaitingDialog != null) {
-            GLog.d("hideWaitingDlg().....");
+            d("hideWaitingDlg().....")
+
             try {
-                mWaitingDialog.dismiss();
-                mWaitingDlgIsShowing = false;
-            } catch (Exception e) {
-                e.printStackTrace();
+                mWaitingDialog!!.dismiss()
+                mWaitingDlgIsShowing = false
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
+
         }
     }
 
@@ -70,21 +68,20 @@ public class DlgUtil {
      * @param context
      * @param msg
      */
-    public static void showMsgDlg(Context context, String msg) {
+    fun showMsgDlg(context: Context?, msg: String?) {
+        destroyAllWindow()
 
-        destroyAllWindow();
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(msg)
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(msg);
-
-        new Handler(Looper.getMainLooper()).post(() -> {
+        Handler(Looper.getMainLooper()).post {
             try {
-                mMsgDialog = builder.create();
-                mMsgDialog.show();
-            } catch (Exception e) {
-                e.printStackTrace();
+                mMsgDialog = builder.create()
+                mMsgDialog?.show()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        });
+        }
     }
 
     /**
@@ -95,28 +92,33 @@ public class DlgUtil {
      * @param isCancelable
      * @param okListener
      */
-    public static void showConfirmDlg(Context context, String msg, boolean isCancelable, DialogInterface.OnClickListener okListener) {
-        destroyAllWindow();
+    fun showConfirmDlg(
+        context: Context?,
+        msg: String?,
+        isCancelable: Boolean,
+        okListener: DialogInterface.OnClickListener?
+    ) {
+        destroyAllWindow()
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(msg);
-        builder.setCancelable(isCancelable);
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(msg)
+        builder.setCancelable(isCancelable)
+
         if (okListener == null) {
-            builder.setPositiveButton(R.string.msg_ok, (dialog, which) -> mConfirmDialog.dismiss());
+            builder.setPositiveButton(R.string.msg_ok) { _, _ -> }
         } else {
-            builder.setPositiveButton(R.string.msg_ok, okListener);
+            builder.setPositiveButton(R.string.msg_ok, okListener)
         }
 
-        new Handler(Looper.getMainLooper()).post(() -> {
+        Handler(Looper.getMainLooper()).post {
             try {
-                mConfirmDialog = builder.create();
-                mConfirmDialog.show();
-            } catch (Exception e) {
-                e.printStackTrace();
+                mConfirmDialog = builder.create()
+                mConfirmDialog?.show()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        });
+        }
     }
-
 
     /**
      * 클릭 이벤트 있는 다이얼로그 (확인, 취소)
@@ -129,51 +131,52 @@ public class DlgUtil {
      * @param cancelBtnTitle
      * @param cancelListener
      */
-    public static void showConfirmDlg2(Context context, String msg, boolean isCancelable,
-                                       String okBtnTitle, DialogInterface.OnClickListener okListener,
-                                       String cancelBtnTitle, DialogInterface.OnClickListener cancelListener) {
-        destroyAllWindow();
+    fun showConfirmDlgWithNegative(
+        context: Context?, msg: String?, isCancelable: Boolean,
+        okBtnTitle: String?, okListener: DialogInterface.OnClickListener?,
+        cancelBtnTitle: String?, cancelListener: DialogInterface.OnClickListener?
+    ) {
+        destroyAllWindow()
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(msg);
-        builder.setCancelable(isCancelable);
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(msg)
+        builder.setCancelable(isCancelable)
+
         if (okListener == null) {
-            builder.setPositiveButton(okBtnTitle, (dialog, which) -> mConfirmDialog.dismiss());
+            builder.setPositiveButton(okBtnTitle) { _, _ -> }
         } else {
-            builder.setPositiveButton(okBtnTitle, okListener);
+            builder.setPositiveButton(okBtnTitle, okListener)
         }
-
         if (cancelListener == null) {
-            builder.setNegativeButton(cancelBtnTitle, (dialog, which) -> mConfirmDialog.dismiss());
+            builder.setNegativeButton(cancelBtnTitle) { _, _ -> }
         } else {
-            builder.setNegativeButton(cancelBtnTitle, cancelListener);
+            builder.setNegativeButton(cancelBtnTitle, cancelListener)
         }
-
-        new Handler(Looper.getMainLooper()).post(() -> {
+        Handler(Looper.getMainLooper()).post {
             try {
-                mConfirmDialog = builder.create();
-                mConfirmDialog.show();
-            } catch (Exception e) {
-                e.printStackTrace();
+                mConfirmDialog = builder.create()
+                mConfirmDialog?.show()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        });
+        }
     }
-
 
     /**
      * 모든 다이얼로그 다 내리기
      */
-    public static void destroyAllWindow() {
-        mWaitingDlgIsShowing = false;
-        if (mWaitingDialog != null) try {
-            mWaitingDialog.dismiss();
-        } catch (Exception ignored) { }
-        if (mMsgDialog != null) try {
-            mMsgDialog.dismiss();
-        } catch (Exception ignored) { }
-        if (mConfirmDialog != null) try {
-            mConfirmDialog.dismiss();
-        } catch (Exception ignored) { }
-    }
+    private fun destroyAllWindow() {
+        mWaitingDlgIsShowing = false
+        try {
+            if (mWaitingDialog != null)
+                mWaitingDialog!!.dismiss()
 
+            if (mMsgDialog != null)
+                mMsgDialog!!.dismiss()
+
+            if (mConfirmDialog != null)
+                mConfirmDialog!!.dismiss()
+        } catch (ignored: Exception) {
+        }
+    }
 }

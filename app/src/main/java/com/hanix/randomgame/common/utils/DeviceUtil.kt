@@ -1,102 +1,99 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import android.annotation.SuppressLint;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.provider.Settings;
-import android.security.KeyChain;
-import android.text.TextUtils;
+import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.content.Context
+import android.content.res.Configuration
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.provider.Settings
+import android.security.KeyChain
+import android.text.TextUtils
+import androidx.annotation.RequiresApi
+import java.util.*
 
-import androidx.annotation.RequiresApi;
-
-import java.util.Locale;
-
-public class DeviceUtil {
-
-    public  enum DEVICE_MAKER {
-        SAMSUNG, LGE, ETC
-    }
-
+object DeviceUtil {
     /**
      * 현재 기기의 모델명을 취득
      */
-    public static String getDeviceModelName() { return Build.MODEL; }
+    val deviceModelName: String
+        get() = Build.MODEL
 
     /**
      * 현재 App 의 build.gradle 의 VersionName 항목값을 가져온다
      */
-    public static String getSwVerName(Context context) {
-        String ver = "";
+    fun getSwVerName(context: Context): String {
+        var ver = ""
+
         try {
-            ver = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-        } catch (Exception e) {
-            e.printStackTrace();
+            ver = context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return ver;
+
+        return ver
     }
 
     /**
      * 현재 기기의 Binary version 을 취득
      */
-    public static String getBinaryVersionName() {
-        String rdoVer = Build.getRadioVersion();
-        if(!TextUtils.isEmpty(rdoVer) && rdoVer.length() > 32) {
-            rdoVer = rdoVer.substring(0,32);
+    val binaryVersionName: String
+        get() {
+            var rdoVer = Build.getRadioVersion()
+
+            if (!TextUtils.isEmpty(rdoVer) && rdoVer.length > 32) {
+                rdoVer = rdoVer.substring(0, 32)
+            }
+
+            return rdoVer
         }
-        return rdoVer;
-    }
 
     /**
      * 삼성, 엘지 디바이스 체크
      */
-    public static DEVICE_MAKER getDeviceMaker() {
-        if(Build.MANUFACTURER.toUpperCase().contains("SAMSUNG")) {
-            return DEVICE_MAKER.SAMSUNG;
+    val deviceMaker: DEVICE_MAKER
+        get() {
+            if (Build.MANUFACTURER.toUpperCase(Locale.ROOT).contains("SAMSUNG"))
+                return DEVICE_MAKER.SAMSUNG
+            else if (Build.MANUFACTURER.toUpperCase(Locale.ROOT).contains("LGE"))
+                return DEVICE_MAKER.LGE
+
+            return DEVICE_MAKER.ETC
         }
-        else if( Build.MANUFACTURER.toUpperCase().contains("LGE")) {
-            return DEVICE_MAKER.LGE;
-        }
-        return DEVICE_MAKER.ETC;
-    }
 
     /**
      * 인터넷 접속 여부 체크
      */
-    public static boolean isOnline(Context context) {
-        try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = cm.getActiveNetworkInfo();
-            return (netInfo != null && netInfo.isConnected());
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            return false;
+    @SuppressLint("MissingPermission")
+    fun isOnline(context: Context): Boolean {
+        return try {
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val netInfo = cm.activeNetworkInfo
+            netInfo != null && netInfo.isConnected
+        } catch (e: NullPointerException) {
+            e.printStackTrace()
+            false
         }
     }
-
 
     /**
      * 현재 Wifi 접속중인지를 검색한다.
      * @return true: wifi 접속중.  false: wifi 접속중 아님.
      */
-    public static boolean isWifiConnected(Context context) {
-        try {
-            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            Network network = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                network = connectivityManager.getActiveNetwork();
-            }
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+    @SuppressLint("MissingPermission")
+    fun isWifiConnected(context: Context): Boolean {
+        return try {
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val network: Network? = connectivityManager.activeNetwork
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
 
-            return capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
@@ -104,19 +101,17 @@ public class DeviceUtil {
      * 현재 Cellular 접속중인지를 검색한다.
      * @return true: cellular 접속중.  false: Cellular 접속중 아님.
      */
-    public static boolean isCellularConnected(Context context) {
-        try {
-            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            Network network = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                network = connectivityManager.getActiveNetwork();
-            }
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-
-            return capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    @SuppressLint("MissingPermission")
+    fun isCellularConnected(context: Context): Boolean {
+        return try {
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val network: Network? = connectivityManager.activeNetwork
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
@@ -127,20 +122,19 @@ public class DeviceUtil {
      * @return string
      */
     @SuppressLint("HardwareIds")
-    public static String getAndroidId(ContentResolver resolver) {
-        return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
+    fun getAndroidId(resolver: ContentResolver?): String {
+        return Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID)
     }
 
     /**
      * iOS 에서 키체인 쓰는 것과 비슷
-     *  디바이스 고유값 가져오기
-     *  - 안드로이드 아이디와 동일하게 공장 초기화시 사라짐
+     * 디바이스 고유값 가져오기
+     * - 안드로이드 아이디와 동일하게 공장 초기화시 사라짐
      * @return
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static String getAndroidKeyChain() {
-        return KeyChain.EXTRA_KEY_ALIAS;
-    }
+    @get:RequiresApi(api = Build.VERSION_CODES.O)
+    val androidKeyChain: String
+        get() = KeyChain.EXTRA_KEY_ALIAS
 
     /**
      * 국가 코드를 가져와준다
@@ -148,14 +142,13 @@ public class DeviceUtil {
      * @param context
      * @return
      */
-    public static String getAndroidCountry(Context context) {
-        Locale locale;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locale = context.getResources().getConfiguration().getLocales().get(0);
+    fun getAndroidCountry(context: Context): String {
+        val locale: Locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.resources.configuration.locales[0]
         } else {
-            locale = context.getResources().getConfiguration().locale;
+            context.resources.configuration.locale
         }
-        return locale.getCountry();
+        return locale.country
     }
 
     /***
@@ -163,11 +156,11 @@ public class DeviceUtil {
      * @param context
      * @return
      */
-    public static boolean IsTablet(Context context) {
+    fun isTablet(context: Context): Boolean {
         //화면 사이즈 종류 구하기
-        int screenSizeType = context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-
-        return screenSizeType == Configuration.SCREENLAYOUT_SIZE_XLARGE || screenSizeType == Configuration.SCREENLAYOUT_SIZE_LARGE;
+        val screenSizeType =
+            context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
+        return screenSizeType == Configuration.SCREENLAYOUT_SIZE_XLARGE || screenSizeType == Configuration.SCREENLAYOUT_SIZE_LARGE
     }
 
     /**
@@ -175,10 +168,13 @@ public class DeviceUtil {
      * @param context
      * @return
      */
-    public static boolean isPhone(Context context) {
-        int screenSizeType = context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+    fun isPhone(context: Context): Boolean {
+        val screenSizeType =
+            context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
+        return screenSizeType == Configuration.SCREENLAYOUT_SIZE_SMALL || screenSizeType == Configuration.SCREENLAYOUT_SIZE_NORMAL
+    }
 
-        return screenSizeType == Configuration.SCREENLAYOUT_SIZE_SMALL || screenSizeType == Configuration.SCREENLAYOUT_SIZE_NORMAL;
+    enum class DEVICE_MAKER {
+        SAMSUNG, LGE, ETC
     }
 }
-

@@ -29,24 +29,25 @@ object GLog {
 
     @Synchronized
     private fun dLong(theMsg: String, logType: Int) {
-        var theMsg: String? = theMsg
-        val MAX_INDEX = 2000
-        if (theMsg == null) return
-        if (theMsg.length > MAX_INDEX) {
-            var theSubString = theMsg.substring(0, MAX_INDEX)
+        var msg: String? = theMsg
+
+        val maxIndex = 2000
+        if (msg == null) return
+        if (msg.length > maxIndex) {
+            var theSubString = msg.substring(0, maxIndex)
             theSubString = getWithMethodName(theSubString)
             when (logType) {
                 1 -> Log.i(AppConstants.TAG, theSubString)
                 2 -> Log.d(AppConstants.TAG, theSubString)
                 3 -> Log.e(AppConstants.TAG, theSubString)
             }
-            dLong(theMsg.substring(MAX_INDEX), MAX_INDEX)
+            dLong(msg.substring(maxIndex), maxIndex)
         } else {
-            theMsg = getWithMethodName(theMsg)
+            msg = getWithMethodName(msg)
             when (logType) {
-                1 -> Log.i(AppConstants.TAG, theMsg)
-                2 -> Log.d(AppConstants.TAG, theMsg)
-                3 -> Log.e(AppConstants.TAG, theMsg)
+                1 -> Log.i(AppConstants.TAG, msg)
+                2 -> Log.d(AppConstants.TAG, msg)
+                3 -> Log.e(AppConstants.TAG, msg)
             }
         }
     }
@@ -69,22 +70,23 @@ object GLog {
     @JvmStatic
     @Synchronized
     fun i(msg: String) {
-        if (RandomApplication.getInstance().isDebuggable) dLong(msg, 1)
+        if (RandomApplication.instance?.isDebuggable == true) dLong(msg, 1)
     }
 
     @JvmStatic
     @Synchronized
     fun d(msg: String) {
-        if (RandomApplication.getInstance().isDebuggable) dLong(msg, 2)
+        if (RandomApplication.instance?.isDebuggable == true) dLong(msg, 2)
     }
 
+    @JvmStatic
     @Synchronized
     fun e(msg: String) {
-        if (RandomApplication.getInstance().isDebuggable) dLong(msg, 3)
+        if (RandomApplication.instance?.isDebuggable == true) dLong(msg, 3)
     }
 
     @JvmStatic
     fun e(msg: String?, e: Exception?) {
-        if (RandomApplication.getInstance().isDebuggable) Log.e(AppConstants.TAG, msg, e)
+        if (RandomApplication.instance?.isDebuggable == true) Log.e(AppConstants.TAG, msg, e)
     }
 }

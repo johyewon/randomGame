@@ -1,150 +1,179 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import java.util.Arrays;
+import okhttp3.internal.and
+import java.util.*
 
 /**
  * 클래스명 : Base64Coder
  * 설명 : Base64Coding 을 담당하는 클래스
  * 주의사항 :
  */
-public class Base64Coder {
+object Base64Coder {
+    private val SYSTEM_LINE_SEPARATOR = System.getProperty("line.separator")
+    private val map1 = CharArray(64)
+    private val map2 = ByteArray(128)
 
-    private static final String SYSTEM_LINE_SEPARATOR = System.getProperty("line.separator");
-    private static char[]    map1 = new char[64];
-    static {
-        int i=0;
-        for (char c='A'; c<='Z'; c++){
-            map1[i++] = c;
-        }
-        for (char c='a'; c<='z'; c++){
-            map1[i++] = c;
-        }
-        for (char c='0'; c<='9'; c++){
-            map1[i++] = c;
-        }
-        map1[i++] = '+'; map1[i++] = '/';
+    fun encodeString(s: String): String {
+        return String(encode(s.toByteArray()))
     }
 
-    private static byte[]    map2 = new byte[128];
-    static {
-        Arrays.fill(map2, (byte) -1);
-        for (int i=0; i<64; i++){
-            map2[map1[i]] = (byte)i;
-        }
-    }
+    @JvmOverloads
+    fun encodeLines(
+        `in`: ByteArray,
+        iOff: Int = 0,
+        iLen: Int = `in`.size,
+        lineLen: Int = 76,
+        lineSeparator: String = SYSTEM_LINE_SEPARATOR
+    ): String {
+        val blockLen = lineLen * 3 / 4
 
-    public static String encodeString (String s) {
-        return new String(encode(s.getBytes()));
-    }
+        require(blockLen > 0)
 
-    public static String encodeLines (byte[] in) {
-        return encodeLines(in, 0, in.length, 76, SYSTEM_LINE_SEPARATOR);
-    }
+        val lines = (iLen + blockLen - 1) / blockLen
+        val bufLen = (iLen + 2) / 3 * 4 + lines * lineSeparator.length
+        val buf = StringBuilder(bufLen)
+        var ip = 0
 
-    public static String encodeLines (byte[] in, int iOff, int iLen, int lineLen, String lineSeparator) {
-        int blockLen = (lineLen*3) / 4;
-        if (blockLen <= 0) throw new IllegalArgumentException();
-        int lines = (iLen+blockLen-1) / blockLen;
-        int bufLen = ((iLen+2)/3)*4 + lines*lineSeparator.length();
-        StringBuilder buf = new StringBuilder(bufLen);
-        int ip = 0;
         while (ip < iLen) {
-            int l = Math.min(iLen-ip, blockLen);
-            buf.append (encode(in, iOff+ip, l));
+            val l = Math.min(iLen - ip, blockLen)
+            buf.append(encode(`in`, iOff + ip, l))
             //buf.append (lineSeparator);
-            ip += l; }
-        return buf.toString();
+            ip += l
+        }
+
+        return buf.toString()
     }
 
-    public static char[] encode (byte[] in) {
-        return encode(in, 0, in.length);
+    @JvmName("encode1")
+    fun encode(`in`: ByteArray, iLen: Int): CharArray {
+        return encode(`in`, 0, iLen)
     }
 
-    public static char[] encode (byte[] in, int iLen) {
-        return encode(in, 0, iLen);
-    }
+    @JvmOverloads
+    fun encode(`in`: ByteArray, iOff: Int = 0, iLen: Int = `in`.size): CharArray {
+        val oDataLen = (iLen * 4 + 2) / 3 // output length without padding
+        val oLen = (iLen + 2) / 3 * 4 // output length including padding
 
-    public static char[] encode (byte[] in, int iOff, int iLen) {
-        int oDataLen = (iLen*4+2)/3;       // output length without padding
-        int oLen = ((iLen+2)/3)*4;         // output length including padding
-        char[] out = new char[oLen];
-        int ip = iOff;
-        int iEnd = iOff + iLen;
-        int op = 0;
+        val out = CharArray(oLen)
+        var ip = iOff
+        val iEnd = iOff + iLen
+        var op = 0
+
         while (ip < iEnd) {
-            int i0 = in[ip++] & 0xff;
-            int i1 = ip < iEnd ? in[ip++] & 0xff : 0;
-            int i2 = ip < iEnd ? in[ip++] & 0xff : 0;
-            int o0 = i0 >>> 2;
-            int o1 = ((i0 &   3) << 4) | (i1 >>> 4);
-            int o2 = ((i1 & 0xf) << 2) | (i2 >>> 6);
-            int o3 = i2 & 0x3F;
-            out[op++] = map1[o0];
-            out[op++] = map1[o1];
-            out[op] = op < oDataLen ? map1[o2] : '='; op++;
-            out[op] = op < oDataLen ? map1[o3] : '='; op++; }
-        return out;
-    }
+            val i0: Int = `in`[ip++] and 0xff
 
-    public static String decodeString (String s) {
-        return new String(decode(s));
-    }
+            val i1 = if (ip < iEnd) `in`[ip++] and 0xff else 0
+            val i2 = if (ip < iEnd) `in`[ip++] and 0xff else 0
 
-    public static byte[] decodeLines (String s) {
-        char[] buf = new char[s.length()];
-        int p = 0;
-        for (int ip = 0; ip < s.length(); ip++) {
-            char c = s.charAt(ip);
-            if (c != ' ' && c != '\r' && c != '\n' && c != '\t')
-                buf[p++] = c;
+            val o0 = i0 ushr 2
+            val o1 = i0 and 3 shl 4 or (i1 ushr 4)
+            val o2 = i1 and 0xf shl 2 or (i2 ushr 6)
+            val o3 = i2 and 0x3F
+
+            out[op++] = map1[o0]
+            out[op++] = map1[o1]
+
+            out[op] = if (op < oDataLen) map1[o2] else '='
+            op++
+
+            out[op] = if (op < oDataLen) map1[o3] else '='
+            op++
         }
-        return decode(buf, 0, p);
+        return out
     }
 
-    public static byte[] decode (String s) {
-        return decode(s.toCharArray());
+    fun decodeString(s: String): String {
+        return String(decode(s))
     }
 
-    public static byte[] decode (char[] in) {
-        return decode(in, 0, in.length);
-    }
+    fun decodeLines(s: String): ByteArray {
+        val buf = CharArray(s.length)
+        var p = 0
 
-    public static byte[] decode (char[] in, int iOff, int iLength) {
-        int iLen = iLength;
-        if (iLen%4 != 0){
-            throw new IllegalArgumentException("Length of Base64 encoded input string is not a multiple of 4.");
+        for (element in s) {
+            if (element != ' ' && element != '\r' && element != '\n' && element != '\t')
+                buf[p++] = element
         }
-        while (iLen > 0 && in[iOff+iLen-1] == '='){
-            iLen--;
+
+        return decode(buf, 0, p)
+    }
+
+    private fun decode(s: String): ByteArray {
+        return decode(s.toCharArray())
+    }
+
+    @JvmOverloads
+    fun decode(`in`: CharArray, iOff: Int = 0, iLength: Int = `in`.size): ByteArray {
+        var iLen = iLength
+
+        require(iLen % 4 == 0) { "Length of Base64 encoded input string is not a multiple of 4." }
+
+        while (iLen > 0 && `in`[iOff + iLen - 1] == '=') {
+            iLen--
         }
-        int oLen = (iLen*3) / 4;
-        byte[] out = new byte[oLen];
-        int ip = iOff;
-        int iEnd = iOff + iLen;
-        int op = 0;
+
+        val oLen = iLen * 3 / 4
+        val out = ByteArray(oLen)
+        var ip = iOff
+        val iEnd = iOff + iLen
+        var op = 0
+
         while (ip < iEnd) {
-            int i0 = in[ip++];
-            int i1 = in[ip++];
-            int i2 = ip < iEnd ? in[ip++] : 'A';
-            int i3 = ip < iEnd ? in[ip++] : 'A';
-            if (i0 > 127 || i1 > 127 || i2 > 127 || i3 > 127)
-                throw new IllegalArgumentException("Illegal character in Base64 encoded data.");
-            int b0 = map2[i0];
-            int b1 = map2[i1];
-            int b2 = map2[i2];
-            int b3 = map2[i3];
-            if (b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0)
-                throw new IllegalArgumentException("Illegal character in Base64 encoded data.");
-            int o0 = ( b0       <<2) | (b1>>>4);
-            int o1 = ((b1 & 0xf)<<4) | (b2>>>2);
-            int o2 = ((b2 &   3)<<6) |  b3;
-            out[op++] = (byte)o0;
-            if (op<oLen) out[op++] = (byte)o1;
-            if (op<oLen) out[op++] = (byte)o2;
+            val i0 = `in`[ip++].toInt()
+            val i1 = `in`[ip++].toInt()
+            val i2 = if (ip < iEnd) `in`[ip++].toInt() else 'A'.toInt()
+            val i3 = if (ip < iEnd) `in`[ip++].toInt() else 'A'.toInt()
+
+            require(!(i0 > 127 || i1 > 127 || i2 > 127 || i3 > 127)) { "Illegal character in Base64 encoded data." }
+
+            val b0 = map2[i0].toInt()
+            val b1 = map2[i1].toInt()
+            val b2 = map2[i2].toInt()
+            val b3 = map2[i3].toInt()
+
+            require(!(b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0)) { "Illegal character in Base64 encoded data." }
+
+            val o0 = b0 shl 2 or (b1 ushr 4)
+            val o1 = b1 and 0xf shl 4 or (b2 ushr 2)
+            val o2 = b2 and 3 shl 6 or b3
+
+            out[op++] = o0.toByte()
+
+            if (op < oLen) out[op++] = o1.toByte()
+            if (op < oLen) out[op++] = o2.toByte()
         }
-        return out;
+        return out
     }
 
-    private Base64Coder() {}
+    init {
+        var i = 0
+        run {
+            var c = 'A'
+            while (c <= 'Z') {
+                map1[i++] = c
+                c++
+            }
+        }
+        run {
+            var c = 'a'
+            while (c <= 'z') {
+                map1[i++] = c
+                c++
+            }
+        }
+        var c = '0'
+        while (c <= '9') {
+            map1[i++] = c
+            c++
+        }
+        map1[i++] = '+'
+        map1[i++] = '/'
+    }
 
+    init {
+        Arrays.fill(map2, (-1).toByte())
+        for (i in 0..63) {
+            map2[map1[i].toInt()] = i.toByte()
+        }
+    }
 }

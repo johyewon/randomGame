@@ -1,39 +1,83 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.media.MediaMetadataRetriever;
-import android.os.Build;
-import android.view.Display;
-import android.view.Window;
-import android.view.WindowManager;
+import com.hanix.randomgame.common.app.GLog.isDebuggable
+import com.hanix.randomgame.common.app.GLog.d
+import com.hanix.randomgame.common.app.GLog.i
+import com.hanix.randomgame.common.app.GLog.e
+import androidx.multidex.MultiDexApplication
+import com.hanix.randomgame.common.app.RandomApplication
+import com.hanix.randomgame.common.app.GLog
+import android.app.Activity
+import android.annotation.SuppressLint
+import android.content.*
+import android.content.pm.PackageManager
+import kotlin.Throws
+import android.graphics.Bitmap
+import android.graphics.Point
+import android.graphics.Rect
+import android.media.MediaMetadataRetriever
+import com.hanix.randomgame.common.utils.Utils.Useage
+import android.os.Build
+import com.hanix.randomgame.common.utils.DlgUtil
+import android.os.Looper
+import com.hanix.randomgame.R
+import android.graphics.drawable.ColorDrawable
+import android.location.Geocoder
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import com.hanix.randomgame.common.utils.GpsUtil
+import android.location.LocationManager
+import com.hanix.randomgame.common.utils.FileUtil
+import com.hanix.randomgame.common.utils.PrefUtil
+import com.hanix.randomgame.common.utils.UrlUtils
+import com.hanix.randomgame.common.utils.DateTimes
+import android.media.AudioManager
+import com.hanix.randomgame.common.utils.ToastUtil
+import android.text.Html
+import android.widget.TextView
+import com.hanix.randomgame.common.utils.DeviceUtil.DEVICE_MAKER
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
+import android.net.NetworkCapabilities
+import androidx.annotation.RequiresApi
+import android.security.KeyChain
+import kotlin.jvm.JvmOverloads
+import com.hanix.randomgame.common.utils.Base64Coder
+import com.hanix.randomgame.common.utils.SecretUtils
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import com.hanix.randomgame.common.utils.RealPathUtil
+import android.provider.DocumentsContract
+import android.provider.MediaStore
+import com.google.android.material.snackbar.Snackbar
+import com.hanix.randomgame.common.utils.SnackBarUtil
+import android.telephony.TelephonyManager
+import com.hanix.randomgame.common.utils.PhoneCallUtil
+import android.telephony.PhoneStateListener
+import android.view.*
+import com.hanix.randomgame.common.receiver.StoreReceiver
+import com.hanix.randomgame.common.constants.URLApi
+import java.lang.Exception
+import java.lang.StringBuilder
+import java.lang.reflect.InvocationTargetException
+import java.text.DecimalFormat
+import java.util.HashSet
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
-import java.util.HashSet;
-import java.util.List;
-
-public class Utils {
-
+object Utils {
     /**
      * 대문자로 변환
      * @param s
      * @return
      */
-    private static String capitalize(String s) {
-        if (s == null || s.length() == 0) {
-            return "";
+    private fun capitalize(s: String?): String {
+        if (s == null || s.length == 0) {
+            return ""
         }
-        char first = s.charAt(0);
-        if (Character.isUpperCase(first)) {
-            return s;
+        val first = s[0]
+        return if (Character.isUpperCase(first)) {
+            s
         } else {
-            return Character.toUpperCase(first) + s.substring(1);
+            Character.toUpperCase(first).toString() + s.substring(1)
         }
     }
 
@@ -42,13 +86,13 @@ public class Utils {
      * @param strInt
      * @return
      */
-    public static int getInt(String strInt) {
+    fun getInt(strInt: String): Int {
         try {
-            return Integer.parseInt(strInt.trim());
-        } catch (Exception e) {
-            e.printStackTrace();
+            return strInt.trim { it <= ' ' }.toInt()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return -1;
+        return -1
     }
 
     /**
@@ -56,31 +100,29 @@ public class Utils {
      * @param strArr
      * @return
      */
-    public static int[] getBubbleSort(String[] strArr) {
-
-        int[] intArr = new int[strArr.length];
+    fun getBubbleSort(strArr: Array<String>): IntArray {
+        val intArr = IntArray(strArr.size)
 
         //str -> int
-        for(int i=0; i<strArr.length; i++) {
-            int naNum = 0;
+        for (i in strArr.indices) {
+            var naNum = 0
             try {
-                naNum = Integer.parseInt( strArr[i].trim() );
-            } catch (Exception ignored) { }
-            intArr[i] = naNum;
+                naNum = strArr[i].trim { it <= ' ' }.toInt()
+            } catch (ignored: Exception) {
+            }
+            intArr[i] = naNum
         }
-
-        int temp;
-        for(int i=intArr.length; i>0; i--) {
-            for (int j=0; j<i-1; j++) {
-
-                if(intArr[j] > intArr[j+1]) {
-                    temp = intArr[j];
-                    intArr[j] = intArr[j+1];
-                    intArr[j+1] = temp;
+        var temp: Int
+        for (i in intArr.size downTo 1) {
+            for (j in 0 until i - 1) {
+                if (intArr[j] > intArr[j + 1]) {
+                    temp = intArr[j]
+                    intArr[j] = intArr[j + 1]
+                    intArr[j + 1] = temp
                 }
             }
         }
-        return intArr;
+        return intArr
     }
 
     /**
@@ -89,55 +131,53 @@ public class Utils {
      * @return
      */
     @SuppressLint("NewApi")
-    public static int getPackageUid(Context context, String packageName) {
-        int uid = -1;
+    fun getPackageUid(context: Context, packageName: String?): Int {
+        var uid = -1
         try {
-            uid = context.getPackageManager().getPackageUid(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
+            uid = context.packageManager.getPackageUid(packageName!!, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
             //e.printStackTrace();
         }
-
-        return uid;
+        return uid
     }
 
     /**
      * 현재앱의 버젼을 반환한다. ex)1.0.0
      * @return 1.0.0
      */
-    public static String getAppVersionName(Context context) {
-        String curAppVersion = "";
+    fun getAppVersionName(context: Context): String {
+        var curAppVersion = ""
         try {
-            curAppVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            curAppVersion =
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
         }
-        return curAppVersion;
+        return curAppVersion
     }
 
     /**
-     *  List<Integer> -> int[] 변환
+     * List<Integer> -> int[] 변환
      * @param list
      * @return
-     */
-    public static int[] toIntArray(List<Integer> list)  {
-        int[] ret = new int[list.size()];
-        int i = 0;
-        for (Integer e : list)
-            ret[i++] = e;
-        return ret;
+    </Integer> */
+    fun toIntArray(list: List<Int>): IntArray {
+        val ret = IntArray(list.size)
+        var i = 0
+        for (e in list) ret[i++] = e
+        return ret
     }
 
     /**
-     *  HashSet<Integer> -> int[] 변환
+     * HashSet<Integer> -> int[] 변환
      * @param list
      * @return
-     */
-    public static int[] toIntArray(HashSet<Integer> list)  {
-        int[] ret = new int[list.size()];
-        int i = 0;
-        for (Integer e : list)
-            ret[i++] = e;
-        return ret;
+    </Integer> */
+    fun toIntArray(list: HashSet<Int>): IntArray {
+        val ret = IntArray(list.size)
+        var i = 0
+        for (e in list) ret[i++] = e
+        return ret
     }
 
     /**
@@ -146,22 +186,22 @@ public class Utils {
      * @return
      * @throws Throwable
      */
-    public static Bitmap retrieveVideoFrameFromVideo(String videoPath) throws Throwable {
-        Bitmap bitmap;
-        MediaMetadataRetriever mediaMetadataRetriever = null;
+    @Throws(Throwable::class)
+    fun retrieveVideoFrameFromVideo(videoPath: String?): Bitmap? {
+        val bitmap: Bitmap
+        var mediaMetadataRetriever: MediaMetadataRetriever? = null
         try {
-            mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(videoPath);
-            bitmap = mediaMetadataRetriever.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Throwable("Exception in retrieveVideoFrameFromVideo(String videoPath)" + e.getMessage());
+            mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(videoPath)
+            bitmap =
+                mediaMetadataRetriever.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Throwable("Exception in retrieveVideoFrameFromVideo(String videoPath)" + e.message)
         } finally {
-            if (mediaMetadataRetriever != null) {
-                mediaMetadataRetriever.release();
-            }
+            mediaMetadataRetriever?.release()
         }
-        return bitmap;
+        return bitmap
     }
 
     /**
@@ -170,133 +210,131 @@ public class Utils {
      * @param size
      * @return
      */
-    public static Useage measureUnit(int size){
-        double m = size/1024;
-        double g = size/1048576;
-        double t = size/1073741824;
-
-        Useage useage = new Useage();
-
-        DecimalFormat dec = new DecimalFormat("0.0");
-
+    fun measureUnit(size: Int): Useage {
+        val m = (size / 1024).toDouble()
+        val g = (size / 1048576).toDouble()
+        val t = (size / 1073741824).toDouble()
+        val useage = Useage()
+        val dec = DecimalFormat("0.0")
         if (size >= 0) {
-            useage.unit = "KB";
-            useage.useage = dec.format(size);
-        } if (m > 0) {
-            useage.unit = "MB";
-            useage.useage = dec.format(m);
-        } if (g > 0) {
-            useage.unit = "GB";
-            useage.useage = dec.format(g);
-        } if (t > 0) {
-            useage.unit = "TB";
-            useage.useage = dec.format(t);
+            useage.unit = "KB"
+            useage.useage = dec.format(size.toLong())
         }
-
-        return useage;
+        if (m > 0) {
+            useage.unit = "MB"
+            useage.useage = dec.format(m)
+        }
+        if (g > 0) {
+            useage.unit = "GB"
+            useage.useage = dec.format(g)
+        }
+        if (t > 0) {
+            useage.unit = "TB"
+            useage.useage = dec.format(t)
+        }
+        return useage
     }
 
-    public static class Useage {
-        public String useage;
-        public String unit;
+    /** 앱이 사용가능한 스크린 사이즈 취득  */
+    fun getAppUsableScreenSize(context: Context): Point {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = windowManager.defaultDisplay
+        val size = Point()
+        display.getSize(size)
+        return size
     }
 
-    /** 앱이 사용가능한 스크린 사이즈 취득 */
-    public static Point getAppUsableScreenSize(Context context) {
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = windowManager.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size;
-    }
-
-    /** 화면 전체 스크린 사이즈 취득 */
-    public static Point getRealScreenSize(Context context) {
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = windowManager.getDefaultDisplay();
-        Point size = new Point();
-
+    /** 화면 전체 스크린 사이즈 취득  */
+    fun getRealScreenSize(context: Context): Point {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = windowManager.defaultDisplay
+        val size = Point()
         if (Build.VERSION.SDK_INT >= 17) {
-            display.getRealSize(size);
+            display.getRealSize(size)
         } else if (Build.VERSION.SDK_INT >= 14) {
             try {
-                size.x = (Integer) Display.class.getMethod("getRawWidth").invoke(display);
-                size.y = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
-            } catch (IllegalAccessException | InvocationTargetException| NoSuchMethodException ignored) {}
+                size.x = (Display::class.java.getMethod("getRawWidth").invoke(display) as Int)
+                size.y = (Display::class.java.getMethod("getRawHeight").invoke(display) as Int)
+            } catch (ignored: IllegalAccessException) {
+            } catch (ignored: InvocationTargetException) {
+            } catch (ignored: NoSuchMethodException) {
+            }
         }
-
-        return size;
+        return size
     }
 
-    /** 타이틀바 높이취득 */
-    public static int getTitleBarHeight(Activity activity) {
-        Rect rect = new Rect();
-        Window win = activity.getWindow();
-        win.getDecorView().getWindowVisibleDisplayFrame(rect);
-        int statusBarHeight = rect.top;
-        int contentViewTop = win.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-
-        return contentViewTop - statusBarHeight;
+    /** 타이틀바 높이취득  */
+    fun getTitleBarHeight(activity: Activity): Int {
+        val rect = Rect()
+        val win = activity.window
+        win.decorView.getWindowVisibleDisplayFrame(rect)
+        val statusBarHeight = rect.top
+        val contentViewTop = win.findViewById<View>(Window.ID_ANDROID_CONTENT).top
+        return contentViewTop - statusBarHeight
     }
 
-
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
+    fun hexStringToByteArray(s: String): ByteArray {
+        val len = s.length
+        val data = ByteArray(len / 2)
+        var i = 0
+        while (i < len) {
+            data[i / 2] = ((Character.digit(s[i], 16) shl 4)
+                    + Character.digit(s[i + 1], 16)).toByte()
+            i += 2
         }
-        return data;
+        return data
     }
 
-    public static String byteArrayToHexString(byte[] bytes){
-        StringBuilder sb = new StringBuilder();
-        for(byte b : bytes){
-            sb.append(String.format("%02X", b&0xff));
+    fun byteArrayToHexString(bytes: ByteArray): String {
+        val sb = StringBuilder()
+        for (b in bytes) {
+            sb.append(String.format("%02X", b and 0xff))
         }
-        return sb.toString();
+        return sb.toString()
     }
 
     /**
      * 블럭 사이즈 내에서 부족한 바이트를 zero 패딩
      */
-    public static byte[] addPadding(byte[] source, int blockSize) {
-        int paddingCnt = source.length % blockSize;
-        byte[] paddingResult = null;
-
+    fun addPadding(source: ByteArray, blockSize: Int): ByteArray? {
+        val paddingCnt = source.size % blockSize
+        var paddingResult: ByteArray? = null
         if (paddingCnt != 0) {
-            paddingResult = new byte[source.length + (blockSize - paddingCnt)];
-            System.arraycopy(source, 0, paddingResult, 0, source.length);
+            paddingResult = ByteArray(source.size + (blockSize - paddingCnt))
+            System.arraycopy(source, 0, paddingResult, 0, source.size)
 
             // 패딩 0x00 값을 추가한다.
-            int addPaddingCnt = blockSize - paddingCnt;
-            for (int i = 0; i < addPaddingCnt; i++) {
-                paddingResult[source.length + i] = (byte) 0x00;
+            val addPaddingCnt = blockSize - paddingCnt
+            for (i in 0 until addPaddingCnt) {
+                paddingResult[source.size + i] = 0x00.toByte()
             }
         } else {
-            paddingResult = source;
+            paddingResult = source
         }
-
-        return paddingResult;
+        return paddingResult
     }
 
-    public static String addPaddingStr(String orgStr, int len) {
-        if(orgStr != null) {
-            int calcLen = orgStr.length() - len;
-            if(calcLen < 0) {
-                calcLen = Math.abs(calcLen);
-                StringBuilder orgStrBuilder = new StringBuilder(orgStr);
-                for(int i = 0; i<calcLen; i++) {
-                    orgStrBuilder.append(" ");
+    fun addPaddingStr(orgStr: String?, len: Int): String {
+        var orgStr = orgStr
+        if (orgStr != null) {
+            var calcLen = orgStr.length - len
+            return if (calcLen < 0) {
+                calcLen = Math.abs(calcLen)
+                val orgStrBuilder = StringBuilder(orgStr)
+                for (i in 0 until calcLen) {
+                    orgStrBuilder.append(" ")
                 }
-                orgStr = orgStrBuilder.toString();
-                return  orgStr;
+                orgStr = orgStrBuilder.toString()
+                orgStr
             } else {
-                return orgStr.substring(0, len);
+                orgStr.substring(0, len)
             }
         }
-        return "";
+        return ""
     }
 
+    class Useage {
+        var useage: String? = null
+        var unit: String? = null
+    }
 }

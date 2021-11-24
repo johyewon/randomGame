@@ -4,11 +4,13 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Process
 import android.text.TextUtils
 import com.hanix.randomgame.common.app.GLog.e
 import com.hanix.randomgame.common.constants.URLApi
 import org.jsoup.Jsoup
 import java.io.IOException
+import kotlin.system.exitProcess
 
 object AppUtil {
     /**
@@ -30,7 +32,7 @@ object AppUtil {
      */
     fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
+        activityManager.getRunningServices(Int.MAX_VALUE).forEach { service ->
             if (serviceClass.name == service.service.className) {
                 return true
             }
@@ -62,19 +64,17 @@ object AppUtil {
     private val marketVersion: String?
         get() {
             try {
-                val doc = Jsoup.connect(URLApi.getStoreURL()).get()
+                val doc = Jsoup.connect(URLApi.storeURL).get()
                 val currentVersionDiv = doc.select(".BgcNfc")
                 val currentVersion = doc.select("div.hAyfc div span.htlgb")
                 for (i in currentVersionDiv.indices) {
                     if (currentVersionDiv[i].text() == "Current Version") return currentVersion[i].text()
                 }
             } catch (e: IOException) {
-                e.printStackTrace()
-                e(e.message!!)
+                e(e.toString())
                 e("문서 오류")
-                e.printStackTrace()
             } catch (runTimeEx: RuntimeException) {
-                e(runTimeEx.message!!)
+                e(runTimeEx.toString())
                 e("버전가져오기 에러")
             }
             return null
@@ -85,5 +85,19 @@ object AppUtil {
         return marketVersion != null && marketVersion != "기기에 따라 다릅니다." && TextUtils.equals(
             getAppVersion(context), marketVersion
         )
+    }
+
+    /**
+     * 어플 종료하기
+     *
+     * @param activity
+     */
+    fun finishApp(activity: Activity) {
+        if (activity.isTaskRoot) {
+            Process.killProcess(Process.myPid())
+            exitProcess(0)
+        } else {
+            activity.finishAffinity()
+        }
     }
 }

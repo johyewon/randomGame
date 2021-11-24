@@ -1,30 +1,21 @@
-package com.hanix.randomgame.common.constants;
+package com.hanix.randomgame.common.constants
 
-import com.hanix.randomgame.common.app.RandomApplication;
+import com.hanix.randomgame.common.app.RandomApplication
 
-public class URLApi {
+object URLApi {
 
-    public static final String  SERVER_URL = "";
+    const val SERVER_URL = ""
+    const val PLAY_STORE_REAL = AppConstants.STORE_URL_GOOGLE + "com.hanix.randomgame"
+    const val PLAY_STORE_DEV = AppConstants.STORE_URL_GOOGLE + "com.hanix.randomgame"
 
-    public static final String PLAY_STORE_REAL =  AppConstants.STORE_URL_GOOGLE + "com.hanix.randomgame";
-    public static final String PLAY_STORE_DEV = AppConstants.STORE_URL_GOOGLE + "com.hanix.randomgame";
+    val storeURL: String
+        get() = if (RandomApplication.getInstance()?.isDebuggable == true) {
+            PLAY_STORE_DEV
+        } else PLAY_STORE_REAL
 
-    /** 서버 url **/
-    // url 취득
-
-    public static String getStoreURL() {
-        if(RandomApplication.getInstance().isDebuggable) {
-            return PLAY_STORE_DEV;
-        }
-        return PLAY_STORE_REAL;
-    }
-
-    public static String getServerUrl( ) {
-        if(RandomApplication.getInstance().isDebuggable) {
-            return SERVER_URL;
-        }
-        return "";
-    }
-
-
+    /** 서버 url  */ // url 취득
+    val serverUrl: String
+        get() = if (RandomApplication.getInstance()?.isDebuggable == true) {
+            SERVER_URL
+        } else ""
 }

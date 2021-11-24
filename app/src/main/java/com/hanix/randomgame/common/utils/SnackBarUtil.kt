@@ -1,42 +1,53 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import android.os.Handler;
-import android.os.Looper;
-import android.view.View;
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import com.google.android.material.snackbar.Snackbar
+import com.hanix.randomgame.common.app.GLog.i
 
-import com.google.android.material.snackbar.Snackbar;
-import com.hanix.randomgame.common.app.GLog;
+object SnackBarUtil {
+    private var mSnackbar: Snackbar? = null
 
-public class SnackBarUtil {
-
-    private static Snackbar mSnackbar;
-
-    public static void hideSnackbar() {
+    /**
+     * 보여지고 있는 Snackbar 다 내리기
+     */
+    private fun hideSnackbar() {
         if (mSnackbar != null) {
-            GLog.i("Snackbar hide true!");
-            mSnackbar.dismiss();
+            i("Snackbar hide true!")
+            mSnackbar!!.dismiss()
         }
     }
 
-    public static void showSnackbar(final View view, final String msg, final int length) {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            hideSnackbar();
-            mSnackbar = Snackbar.make(view, msg, length);
-            mSnackbar.show();
-        });
+    /**
+     * 일반 Snackbar 노출
+     */
+    fun showSnackbar(view: View?, msg: String, length: Int) {
+        if (view != null) {
+            Handler(Looper.getMainLooper()).post {
+                hideSnackbar()
+                mSnackbar = Snackbar.make(view, msg, length)
+                mSnackbar!!.show()
+            }
+        }
     }
 
-    public static void showSnackbarClick(final View view, final String msg, final int length, String clickMsg, View.OnClickListener clickListener) {
-        hideSnackbar();
-
-        new Handler(Looper.getMainLooper()).post(() -> {
-            hideSnackbar();
-            if (clickListener == null) {
-                mSnackbar = Snackbar.make(view, msg, length).setAction(clickMsg, (v) -> mSnackbar.dismiss());
+    fun showSnackbarClick(
+        view: View?,
+        msg: String?,
+        length: Int,
+        clickMsg: String?,
+        clickListener: View.OnClickListener?
+    ) {
+        hideSnackbar()
+        Handler(Looper.getMainLooper()).post {
+            hideSnackbar()
+            mSnackbar = if (clickListener == null) {
+                Snackbar.make(view!!, msg!!, length).setAction(clickMsg) { }
             } else {
-                mSnackbar = Snackbar.make(view, msg, length).setAction(clickMsg, clickListener);
+                Snackbar.make(view!!, msg!!, length).setAction(clickMsg, clickListener)
             }
-            mSnackbar.show();
-        });
+            mSnackbar!!.show()
+        }
     }
 }

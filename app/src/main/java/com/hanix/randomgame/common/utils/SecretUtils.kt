@@ -1,71 +1,76 @@
-package com.hanix.randomgame.common.utils;
+package com.hanix.randomgame.common.utils
 
-import android.annotation.SuppressLint;
-
-import com.hanix.randomgame.common.app.GLog;
-
-import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-
-import java.nio.charset.StandardCharsets;
-import java.security.Security;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import android.annotation.SuppressLint
+import com.hanix.randomgame.common.app.GLog.e
+import org.apache.commons.codec.binary.Base64
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.util.encoders.Hex
+import java.nio.charset.StandardCharsets
+import java.security.Security
+import javax.crypto.Cipher
+import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * 암복호화 유틸
  */
-public class SecretUtils {
+object SecretUtils {
 
-    private static byte[] keyData = null;
-    private static byte[] iv = null;
+    private var keyData: ByteArray? = null
+    private var iv: ByteArray? = null
 
-    public static void setKeyDataDecodeStr(String decodeStr) {
-        String keyDataDecodeStr = Utils.byteArrayToHexString(Utils.addPaddingStr(decodeStr, 16).getBytes());
-        keyData = Hex.decode(keyDataDecodeStr);
+    fun setKeyDataDecodeStr(decodeStr: String?) {
+        val keyDataDecodeStr =
+            Utils.byteArrayToHexString(Utils.addPaddingStr(decodeStr, 16).toByteArray())
+        keyData = Hex.decode(keyDataDecodeStr)
     }
 
-    public static void setIvDataDecodeStr(String decodeStr) {
-        String ivDataDecodeStr = Utils.byteArrayToHexString(Utils.addPaddingStr(decodeStr, 16).getBytes());
-        iv = Hex.decode(ivDataDecodeStr);
+    fun setIvDataDecodeStr(decodeStr: String?) {
+        val ivDataDecodeStr =
+            Utils.byteArrayToHexString(Utils.addPaddingStr(decodeStr, 16).toByteArray())
+        iv = Hex.decode(ivDataDecodeStr)
     }
 
-    /** 복호화 **/
+    /** 복호화  */
     @SuppressLint("GetInstance")
-    public static String getDecStr(String encStr) {
-        String decStr = "";
+    fun getDecStr(encStr: String): String {
+        var decStr = ""
+
         try {
-            Security.addProvider(new BouncyCastleProvider());
-            SecretKey secureKey = new SecretKeySpec(keyData, "AES");
-            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
-            c.init(Cipher.DECRYPT_MODE, secureKey, new IvParameterSpec(iv));
-            byte[] enc = Base64.decodeBase64(encStr.getBytes());
-            decStr = new String(c.doFinal(enc), StandardCharsets.UTF_8);
-        } catch ( Exception e) {
-            GLog.e(e.getMessage(), e);
+            Security.addProvider(BouncyCastleProvider())
+
+            val secureKey: SecretKey = SecretKeySpec(keyData, "AES")
+            val c = Cipher.getInstance("AES/CBC/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME)
+            c.init(Cipher.DECRYPT_MODE, secureKey, IvParameterSpec(iv))
+
+            val enc = Base64.decodeBase64(encStr.toByteArray())
+            decStr = String(c.doFinal(enc), StandardCharsets.UTF_8)
+
+        } catch (e: Exception) {
+            e(e.message, e)
         }
-        return decStr;
+        return decStr
     }
 
-
-    /** 암호화 **/
+    /** 암호화  */
     @SuppressLint("GetInstance")
-    public static String getEncStr(String plainStr) {
-        String encStr = "";
-        try  {
-            Security.addProvider(new BouncyCastleProvider());
-            SecretKey secureKey = new SecretKeySpec(keyData,"AES");
-            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
-            c.init(Cipher.ENCRYPT_MODE, secureKey, new IvParameterSpec(iv));
-            byte[] results = c.doFinal(plainStr.getBytes());
-            encStr = new String(Base64.encodeBase64(results), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            GLog.e(e.getMessage(), e);
+    fun getEncStr(plainStr: String): String {
+        var encStr = ""
+
+        try {
+            Security.addProvider(BouncyCastleProvider())
+
+            val secureKey: SecretKey = SecretKeySpec(keyData, "AES")
+            val c = Cipher.getInstance("AES/CBC/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME)
+            c.init(Cipher.ENCRYPT_MODE, secureKey, IvParameterSpec(iv))
+
+            val results = c.doFinal(plainStr.toByteArray())
+            encStr = String(Base64.encodeBase64(results), StandardCharsets.UTF_8)
+
+        } catch (e: Exception) {
+            e(e.message, e)
         }
-        return encStr;
+        return encStr
     }
 }
