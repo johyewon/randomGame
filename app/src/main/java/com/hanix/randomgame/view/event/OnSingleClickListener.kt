@@ -1,24 +1,26 @@
-package com.hanix.randomgame.view.event;
+package com.hanix.randomgame.view.event
 
-import android.os.SystemClock;
-import android.view.View;
+import android.os.SystemClock
+import android.view.View
 
-public abstract class OnSingleClickListener implements View.OnClickListener{
+abstract class OnSingleClickListener : View.OnClickListener {
 
-    private static final long MIN_CLICK_INTERVAL = 600;
-    private long mLastClick = 0;
+    private var mLastClick: Long = 0
+    abstract fun onSingleClick(v: View?)
 
-    public abstract void onSingleClick(View v);
-
-    @Override
-    public void onClick(View v) {
-        long currentClickTime = SystemClock.uptimeMillis();
-        long elapsedTime = currentClickTime - mLastClick;
-        mLastClick = currentClickTime;
+    override fun onClick(v: View) {
+        val currentClickTime = SystemClock.uptimeMillis()
+        val elapsedTime = currentClickTime - mLastClick
+        mLastClick = currentClickTime
 
         // 중복 클릭이 아닌 경우
-        if(elapsedTime > MIN_CLICK_INTERVAL) {
-            onSingleClick(v);
+        if (elapsedTime > MIN_CLICK_INTERVAL) {
+            onSingleClick(v)
         }
     }
+
+    companion object {
+        private const val MIN_CLICK_INTERVAL: Long = 600
+    }
+
 }
