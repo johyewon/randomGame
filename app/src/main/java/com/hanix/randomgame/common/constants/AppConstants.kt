@@ -5,7 +5,7 @@ package com.hanix.randomgame.common.constants
  */
 object AppConstants {
     /** App Tag  */
-    const val TAG = "ClosetClient"
+    const val TAG = "RandomGame"
 
     /** 통신연결 Timeout 시간  */
     const val TIME_OUT = 15000 //15초

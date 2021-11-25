@@ -93,6 +93,8 @@
         android:layout_marginStart="100dp"
         android:layout_marginEnd="100dp"
         android:layout_marginBottom="10dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:fontFamily="@font/applesdgothicneom"
         android:text="@string/cmm_confirm"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
