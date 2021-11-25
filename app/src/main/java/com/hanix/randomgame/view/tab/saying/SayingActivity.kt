@@ -22,6 +22,6 @@ class SayingActivity : AppCompatActivity() {
      * OnClickListener -> 중복 클릭 방지를 위해 OnSingleClickListener 를 사용한다.
      */
     var sayingClick: OnSingleClickListener = object : OnSingleClickListener() {
-        override fun onSingleClick(v: View) {}
+        override fun onSingleClick(v: View?) {}
     }
 }

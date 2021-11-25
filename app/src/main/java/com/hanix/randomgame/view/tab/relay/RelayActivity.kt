@@ -22,6 +22,6 @@ class RelayActivity : AppCompatActivity() {
      * OnClickListener -> 중복 클릭 방지를 위해 OnSingleClickListener 사용
      */
     var relayClick: OnSingleClickListener = object : OnSingleClickListener() {
-        override fun onSingleClick(v: View) {}
+        override fun onSingleClick(v: View?) {}
     }
 }

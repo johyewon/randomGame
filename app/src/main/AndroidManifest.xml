@@ -73,7 +73,12 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
-
+        <activity
+            android:name=".view.tab.character.CharGameActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
