@@ -3,11 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.hanix.randomgame">
 
-    <uses-permission android:name="android.permission.AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -20,9 +18,11 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup">
+
         <activity
             android:name=".view.AppIntro"
             android:configChanges="orientation|screenSize"
+            android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -31,42 +31,54 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".view.MainActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
+
         <activity
             android:name=".view.tab.saying.SayingActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
+
         <activity
             android:name=".view.tab.relay.RelayActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
+
         <activity
             android:name=".view.tab.object.ObjectActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
+
         <activity
             android:name=".view.tab.idiom.IdiomActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
+
         <activity
             android:name=".view.tab.body.BodyActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
+
         <activity
             android:name=".view.tab.character.CharacterActivity"
             android:configChanges="orientation|screenSize"
